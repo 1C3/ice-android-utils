@@ -12,7 +12,7 @@ public class IceImageUtils {
 
         // calc scale, load appropriately downsampled bitmap from given resource
 
-        Bitmap rawBitmap, resWidth, resHeight = resLoad( res, resId, width, height );
+        Bitmap rawBitmap, width, height, resWidth, resHeight = resLoad( res, resId, width, height );
 
         // compare aspect ratio and crop
 
@@ -38,12 +38,15 @@ public class IceImageUtils {
         float yScale = (float) height / (float) resHeight;
         float scale = Math.max( xScale, yScale );
 
+        if( width == 0 ) width = (int) Math.round( resWidth / scale );
+        else if( height == 0 ) height = (int) Math.round( resHeight / scale );
+
         resOptions.inSampleSize = sampleSize( scale );
         resWidth /= resOptions.inSampleSize;
         resHeight /= resOptions.inSampleSize;
         options.inJustDecodeBounds = false;
 
-        return BitmapFactory.decodeResource( res, resId, options ), resWidth, resHeight;
+        return BitmapFactory.decodeResource( res, resId, options ), width, height, resWidth, resHeight;
     }
 
     // calc samplesize for scaled resource loading
@@ -69,7 +72,7 @@ public class IceImageUtils {
         float yScale = (float) height / (float) resHeight;
         float scale = Math.max( xScale, yScale );
 
-        if( xScale > yScale ) {
+        if( xScale >= yScale ) {
             int cropWidth = (int) Math.round( resWidth );
             int cropX = 0;
             int cropHeight = (int) Math.round( height / scale );
