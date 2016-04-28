@@ -1,31 +1,12 @@
-/**
- * Created by riccardo on 4/28/16.
- */
-
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 public class IceImageUtils {
 
-    public static Bitmap bitmapLoad( Resource res, int resId, int width, int height ) {
+    public static Bitmap bitmapLoad( Resources res, int resId, int width, int height ) {
 
-        // calc scale, load appropriately downsampled bitmap from given resource
-
-        Bitmap rawBitmap, width, height, resWidth, resHeight = resLoad( res, resId, width, height );
-
-        // compare aspect ratio and crop
-
-        rawBitmap = bitmapCrop( rawBitmap, width, height, resWidth, resHeight );
-
-        // scale to desired size
-
-        return Bitmap.createScaledBitmap( rawBitmap, width, height, true );
-    }
-
-    // load downsampled bitmap from resource
-
-    private static Bitmap resLoad( Resource res, int resId, int width, int height ) {
+        // calc scale, load appropriately sampled bitmap from given resource
 
         BitmapFactory.Options resOptions = new BitmapFactory.Options();
         resOptions.inJustDecodeBounds = true;
@@ -38,18 +19,26 @@ public class IceImageUtils {
         float yScale = (float) height / (float) resHeight;
         float scale = Math.max( xScale, yScale );
 
-        if( width == 0 ) width = (int) Math.round( resWidth / scale );
-        else if( height == 0 ) height = (int) Math.round( resHeight / scale );
+        if( width == 0 ) width = Math.round( resWidth / scale );
+        else if( height == 0 ) height = Math.round( resHeight / scale );
 
         resOptions.inSampleSize = sampleSize( scale );
         resWidth /= resOptions.inSampleSize;
         resHeight /= resOptions.inSampleSize;
-        options.inJustDecodeBounds = false;
+        resOptions.inJustDecodeBounds = false;
 
-        return BitmapFactory.decodeResource( res, resId, options ), width, height, resWidth, resHeight;
+        Bitmap rawBitmap = BitmapFactory.decodeResource( res, resId, resOptions );
+
+        // compare aspect ratio and crop
+
+        rawBitmap = bitmapCrop( rawBitmap, width, height, resWidth, resHeight );
+
+        // scale to desired size
+
+        return Bitmap.createScaledBitmap( rawBitmap, width, height, true );
     }
 
-    // calc samplesize for scaled resource loading
+    // calc sample size for scaled resource loading
 
     private static int sampleSize( float scale ) {
 
@@ -68,21 +57,23 @@ public class IceImageUtils {
 
     private static Bitmap bitmapCrop( Bitmap rawBitmap, int width, int height, int resWidth, int resHeight ) {
 
+        int cropX, cropY, cropWidth, cropHeight;
+
         float xScale = (float) width / (float) resWidth;
         float yScale = (float) height / (float) resHeight;
         float scale = Math.max( xScale, yScale );
 
         if( xScale >= yScale ) {
-            int cropWidth = (int) Math.round( resWidth );
-            int cropX = 0;
-            int cropHeight = (int) Math.round( height / scale );
-            int cropY = ( resHeight - cropHeight ) / 2;
+            cropWidth = Math.round( resWidth );
+            cropX = 0;
+            cropHeight = Math.round( height / scale );
+            cropY = ( resHeight - cropHeight ) / 2;
         }
         else {
-            int cropWidth = (int) Math.round( width / scale );
-            int cropX = ( resWidth - cropWidth ) / 2;
-            int cropHeight = (int) Math.round( resHeight );
-            int cropY = 0;
+            cropWidth = Math.round( width / scale );
+            cropX = ( resWidth - cropWidth ) / 2;
+            cropHeight = Math.round( resHeight );
+            cropY = 0;
         }
 
         return Bitmap.createBitmap( rawBitmap, cropX, cropY, cropWidth, cropHeight );
