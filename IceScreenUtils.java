@@ -18,4 +18,9 @@ public class IceScreenUtils {
 
         return IceScreenUtils.isPortrait( context ) ? context.getResources().getDisplayMetrics().heightPixels : context.getResources().getDisplayMetrics().widthPixels;
     }
+
+    public static float densityScale( Context context ) {
+
+        return ( context.getResources().getDisplayMetrics().density );
+    }
 }
